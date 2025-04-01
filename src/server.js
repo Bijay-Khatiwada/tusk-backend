@@ -30,6 +30,7 @@ app.use("/user", require("../routes/user-routes"));
 
 // ✅ Use Payment Routes
 app.use("/payment", paymentRoutes);
+app.use("/payment2", paymentRoutes);
 
 
 app.listen(config.port, () => {
