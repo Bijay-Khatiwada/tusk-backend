@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const activityController = require("../controllers/activity-controller");
 const upload = require("../multer");
-const { isAdmin } = require("../middleware/middleware");
+const { isAdmin } = require("../middleware/middleware");//comments
 
 router.post('/create', upload.single('image'), activityController.createActivity);
 
