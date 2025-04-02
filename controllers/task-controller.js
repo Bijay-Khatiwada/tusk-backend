@@ -26,33 +26,45 @@ exports.getTaskById = async (req, res) => {
   }
 };
 
-// Create a new task
+// Create a new taskconst Task = require('../models/task'); // assuming the task model is in models/task.js
+const User = require('../models/user.js'); // assuming the user model is in models/user.js
+const taskService = require('../services/task-services'); // assuming task service contains logic for task operations
+
 exports.createTask = async (req, res) => {
   try {
-    if (!req.file) {
-      return res.status(400).json({ error: "Image file is required" });
+    // Ensure the image is provided (if that's part of the task requirements)
+
+    // Destructure body params
+    const { title, description, priority, createdAt, updatedAt, createdBy, assignedTo, status} = req.body;
+    
+
+    // Check if the user who created the task exists
+    // const user = await User.findById(userId);
+    // if (!user) {
+    //   return res.status(404).json({ message: 'User not found' });
+    // }
+
+    // Check if the assigned user exists (optional, you can skip this if it's not required)
+    if (assignedTo) {
+      const assignedUser = await User.findById(assignedTo);
+      if (!assignedUser) {
+        return res.status(404).json({ message: 'Assigned user not found' });
+      }
     }
 
-    const { taskModel, location, price, description, pickupdate, dropoffdate, userId, condition } = req.body;
-    const imagePath = `/uploads/${req.file.filename}`;
-
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-
+    // Use the taskService to create a new task
     const newTask = await taskService.createTask(
-      taskModel,
-      location,
-      price,
-      imagePath,
+      title,
       description,
-      pickupdate,
-      dropoffdate,
-      userId,
-      condition
+      priority,
+      createdAt,
+      updatedAt,
+      createdBy,
+      assignedTo,
+      status
     );
 
+    // Respond with the newly created task
     res.status(201).json(newTask);
   } catch (error) {
     console.error("Error creating task:", error);

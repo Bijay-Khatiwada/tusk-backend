@@ -1,8 +1,8 @@
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
-const config = require("../config/config");
-const upload = require("../multer");
+const config = require("./config/config.js");
+const upload = require("./multer.js");
 // const paymentRoutes = require("../routes/payment-routes");here
 
 const app = express();
@@ -24,15 +24,15 @@ db.on("error", console.error.bind(console, "Connection error:"));
 db.once("open", () => console.log("Connected to MongoDB"));
 
 // ✅ Define Routes
-app.use("/task", require("../routes/task-routes"));
-app.use("/user", require("../routes/user-routes"));
-app.use("/team", require("../routes/team-routes.js"));
-app.use("/comment", require("../routes/comment-routes"));
-app.use("/notification", require("../routes/notification-routes"));
-app.use("/project", require("../routes/project-routes"));
-app.use("/activity", require("../routes/activity-routes"));
+app.use("/task", require("./routes/task-routes.js"));
+app.use("/user", require("./routes/user-routes.js"));
+// app.use("/team", require("./routes/team-routes.js"));
+// app.use("/comment", require("./routes/comment-routes.js"));
+// app.use("/notification", require("./routes/notification-routes.js"));
+// app.use("/project", require("./routes/project-routes.js"));
+// app.use("/activity", require("./routes/activity-routes.js"));
 
-app.use("/payment", paymentRoutes);
+// app.use("/payment", paymentRoutes);
 
 
 
