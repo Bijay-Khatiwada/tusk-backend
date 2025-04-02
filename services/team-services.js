@@ -12,7 +12,7 @@ exports.createTeam = async (name, description, createdBy, members, projects) => 
 
 exports.getAllTeams = async () => {
   try {
-    return await Team.find().populate("members").populate("projects");
+    return await Team.find({});
   } catch (error) {
     console.error("Error fetching teams:", error);
     throw new Error("Error fetching teams: " + error.message);
