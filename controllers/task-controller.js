@@ -32,18 +32,8 @@ const taskService = require('../services/task-services'); // assuming task servi
 
 exports.createTask = async (req, res) => {
   try {
-    // Ensure the image is provided (if that's part of the task requirements)
-
     // Destructure body params
     const { title, description, priority, createdAt, updatedAt, createdBy, assignedTo, status} = req.body;
-    
-
-    // Check if the user who created the task exists
-    // const user = await User.findById(userId);
-    // if (!user) {
-    //   return res.status(404).json({ message: 'User not found' });
-    // }
-
     // Check if the assigned user exists (optional, you can skip this if it's not required)
     if (assignedTo) {
       const assignedUser = await User.findById(assignedTo);
@@ -51,7 +41,6 @@ exports.createTask = async (req, res) => {
         return res.status(404).json({ message: 'Assigned user not found' });
       }
     }
-
     // Use the taskService to create a new task
     const newTask = await taskService.createTask(
       title,
