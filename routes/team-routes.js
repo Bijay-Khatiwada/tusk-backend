@@ -6,6 +6,8 @@ const teamController = require("../controllers/team-controller");
 router.post('/create', teamController.createTeam);
 router.put('/update/:id', teamController.updateTeam);
 router.delete('/delete/:id', teamController.deleteTeam);
+router.get('/list', teamController.listTeams);
+router.get('/list/:id', teamController.getTeamById);
 // router.get('/list', teamController.listTeams);
 // router.get('/list/:id', teamController.getTeamById);
 

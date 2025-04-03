@@ -1,4 +1,6 @@
 const Team = require("../models/team.js");
+const User = require("../models/user.js");
+const Project = require("../models/project.js");
 
 exports.createTeam = async (name, description, createdBy, members, projects) => {
   try {
@@ -21,12 +23,15 @@ exports.getAllTeams = async () => {
 
 exports.getTeamById = async (teamId) => {
   try {
-    return await Team.findById(teamId).populate("members").populate("projects");
+    return await Team.findById(teamId)
+    .populate('members', 'name')   // Populate members (referencing User model)
+      .populate("projects"); // Populate projects (referencing Project model)
   } catch (error) {
     console.error("Error fetching team:", error);
     throw new Error("Error fetching team: " + error.message);
   }
 };
+
 
 exports.updateTeam = async (teamId, updateData) => {
   try {
