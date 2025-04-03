@@ -27,6 +27,7 @@ db.once("open", () => console.log("Connected to MongoDB"));
 app.use("/task", require("./routes/task-routes.js"));
 app.use("/user", require("./routes/user-routes.js"));
 app.use("/team", require("./routes/team-routes.js"));
+app.use("/comment", require("./routes/comment-routes.js"));
 // app.use("/comment", require("./routes/comment-routes.js"));
 // app.use("/notification", require("./routes/notification-routes.js"));
 // app.use("/project", require("./routes/project-routes.js"));
