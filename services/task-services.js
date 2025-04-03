@@ -48,6 +48,39 @@ exports.getTaskById = async (id) => {
 
 
 // Create a new task
+exports.createTask = async (
+  title,
+  description,
+  priority,
+  createdAt,
+  updatedAt,
+  createdBy,
+  assignedTo,
+  status,
+  condition,
+  userId
+) => {
+  try {
+    const newTask = new Task({
+      title,
+      description,
+      priority,
+      createdAt,
+      updatedAt,
+      createdBy,
+      assignedTo,
+      status, 
+      condition,
+      user: userId, // user who created the task
+    });
+
+    // Save the task to the database
+    return await newTask.save();
+  } catch (error) {
+    console.error("Error saving task:", error);
+    throw new Error('Error creating task: ' + error.message);
+  }
+}; 
 const Task = require('../models/task'); // assuming task model is in models/task.js
 
 exports.updateTask = async (taskId, updateData) => {
