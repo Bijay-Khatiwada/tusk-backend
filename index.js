@@ -34,6 +34,8 @@ app.use("/comment", require("./routes/comment-routes.js"));
 // app.use("/activity", require("./routes/activity-routes.js"));
 
 // app.use("/payment", paymentRoutes);
+// app.use("/test", require("./routes/test-routes.js"))
+app.use("/project", require("./routes/project-routes.js"))
 
 
 
