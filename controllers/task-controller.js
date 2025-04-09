@@ -60,53 +60,30 @@ exports.createTask = async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
-
+const taskM = require('../models/task.js');
+const mongoose = require('mongoose');
 // Update a task
 exports.updateTask = async (req, res) => {
   try {
-    const { id } = req.params;
-    console.log("Task ID:", id);
+    const { id } = req.params; // FIX: Use 'id' instead of 'taskId'
+    const updateData = req.body;
 
-    const task = await TaskModel.findById(id);
-    if (!task) {
-      console.log("Task not found.");
-      return res.status(404).json({ message: 'Task not found' });
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid Task ID" });
     }
 
-    console.log("Request Body:", req.body);
-    console.log("Request File:", req.file);
+    console.log("Fetching Task with ID:", id); // Debugging log
 
-    const { taskModel, location, price, description, pickupdate, dropoffdate, userId, condition } = req.body;
-
-    const user = await User.findById(userId);
-    if (!user) {
-      console.log("User not found.");
-      return res.status(404).json({ message: 'User not found' });
+    const existingTask = await taskService.getTaskById(id);
+    if (!existingTask) {
+      return res.status(404).json({ message: "Task not found" });
     }
 
-
-    const imagePath = req.file ? `/uploads/${req.file.filename}` : task.image;
-    console.log("Image Path:", imagePath);
-
-    const updatedTask = await taskService.updateTask(
-      id,
-      taskModel,
-      location,
-      price,
-      imagePath,
-      description,
-      pickupdate,
-      dropoffdate,
-      userId,
-      condition
-    );
-
-    console.log("Updated Task:", updatedTask);
-
+    const updatedTask = await taskService.updateTask(id, updateData);
     res.status(200).json(updatedTask);
   } catch (error) {
     console.error("Error updating task:", error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ error: "Internal Server Error" });
   }
 };
 

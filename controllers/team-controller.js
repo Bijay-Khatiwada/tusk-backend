@@ -3,6 +3,7 @@
 const Team = require("../models/team.js");
 const teamService = require("../services/team-services.js");
 const User = require('../models/user.js');
+const Project = require('../models/project.js');
 
 exports.createTeam = async (req, res) => {
   try {
@@ -23,7 +24,7 @@ exports.createTeam = async (req, res) => {
   }
 };
 
-exports.getTeams = async (req, res) => {
+exports.listTeams = async (req, res) => {
   try {
     const teams = await teamService.getAllTeams();
     res.status(200).json(teams);

@@ -33,18 +33,21 @@ exports.listallTasks = async (userId = null, excludeUserId = null) => {
 // Get a task by ID
 exports.getTaskById = async (id) => {
   try {
-    const task = await TaskModel.findById(id).select('-user'); // Exclude user details
-    if (!task) throw new Error("Task not found");
+    const task = await TaskModel.findById(id).select('-user').lean(); // Exclude user details and improve performance
+
+    if (!task) {
+      throw new Error("Task not found");
+    }
+
     return task;
   } catch (error) {
     console.error("Error fetching task:", error);
-    throw error;
+    throw error; // Re-throw so the controller can handle it
   }
 };
 
-// Create a new task
-const Task = require('../models/task'); // assuming task model is in models/task.js
 
+// Create a new task
 exports.createTask = async (
   title,
   description,
@@ -77,37 +80,68 @@ exports.createTask = async (
     console.error("Error saving task:", error);
     throw new Error('Error creating task: ' + error.message);
   }
+}; 
+const Task = require('../models/task'); // assuming task model is in models/task.js
+
+exports.updateTask = async (taskId, updateData) => {
+  try {
+    const updatedTask = await Task.findByIdAndUpdate(taskId, updateData, {
+      new: true, // Return updated document
+      runValidators: true, // Ensure updated data follows schema rules
+    });
+
+    return updatedTask;
+  } catch (error) {
+    console.error("Error updating task:", error);
+    throw new Error('Error updating task: ' + error.message);
+  }
 };
 
 
-// Update an existing task
-exports.updateTask = async (
-  id,
-  TaskModel,
-  location,
-  price,
-  image,
-  description,
-  pickupdate,
-  dropoffdate,
-  userId,
-  condition
-) => {
+// exports.updateTask = async (
+//   id,
+//   location,
+//   price,
+//   image,
+//   description,
+//   pickupdate,
+//   dropoffdate,
+//   userId,
+//   condition
+// ) => {
+//   try {
+//     console.log("Updating task with ID:", id);
+
+//     const updatedTask = await TaskModel.findByIdAndUpdate(
+//       id,
+//       {
+//         location,
+//         price,
+//         image,
+//         description,
+//         pickupdate,
+//         dropoffdate,
+//         user: userId,
+//         condition,
+//       },
+//       { new: true } // ✅ Ensure the updated task is returned
+//     );
+
+//     if (!updatedTask) throw new Error("Task not found");
+//     return updatedTask;
+//   } catch (error) {
+//     console.error("Error updating task:", error);
+//     throw error;
+//   }
+// };
+exports.updateTask = async (id, updateData) => {
   try {
+    console.log("Updating task with ID:", id);
+
     const updatedTask = await TaskModel.findByIdAndUpdate(
       id,
-      {
-        TaskModel,
-        location,
-        price,
-        image,
-        description,
-        pickupdate,
-        dropoffdate,
-        user: userId,
-        condition,
-      },
-      { new: true } // Return the updated document
+      updateData, // Use the entire updateData object here
+      { new: true } // ✅ Ensure the updated task is returned
     );
 
     if (!updatedTask) throw new Error("Task not found");
@@ -117,6 +151,8 @@ exports.updateTask = async (
     throw error;
   }
 };
+
+
 
 // Delete a task
 exports.deleteTask = async (id) => {
