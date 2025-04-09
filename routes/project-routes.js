@@ -1,19 +1,18 @@
 const express = require("express");
 const router = express.Router();
 const projectController = require("../controllers/project-controller");
-const upload = require("../multer");
-const { isAdmin } = require("../middleware/middleware");
+// const { isAdmin } = require("../middleware/middleware");
+// const { validateProject } = require("../middleware/validation");
 
-router.post('/create', upload.single('image'), projectController.createProject);
-
-router.put('/update/:id', upload.single('image'), projectController.updateProject);
-
-router.delete('/delete/:id', projectController.deleteProject);
+// Basic project routes
+router.post('/create', validateProject, projectController.createProject);
+router.put('/update/:projectId', validateProject, projectController.updateProject);
+router.delete('/delete/:projectId', isAdmin, projectController.deleteProject); // Added isAdmin middleware
 router.get('/list', projectController.listProjects);
-router.get('/list/:id', projectController.getProjectById);
+router.get('/list/:projectId', projectController.getProjectById);
 
-//admin project routes
-router.delete("/admin/delete-project/:id", isAdmin, projectController.deleteProject); //  Delete project
-router.put("/admin/update-project/:id", isAdmin, upload.single('image'), projectController.updateProject); // 
+// Admin project routes
+// router.delete("/admin/delete-project/:projectId", isAdmin, projectController.adminDeleteProject);
+// router.put("/admin/update-project/:projectId", isAdmin, projectController.adminUpdateProject);
 
 module.exports = router;
