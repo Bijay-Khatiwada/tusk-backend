@@ -54,7 +54,7 @@ exports.updateProject = async (req, res) => {
 
 exports.deleteProject = async (req, res) => {
   try {
-    const deletedProject = await projectService.deleteProject(req.params.projectId);
+    const deletedProject = await projectService.deleteProject(req.params.id);
     if (!deletedProject) {
       return res.status(404).json({ message: "Project not found" });
     }

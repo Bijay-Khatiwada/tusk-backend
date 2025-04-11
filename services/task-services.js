@@ -11,12 +11,16 @@ exports.listallTasks = async (userId = null, excludeUserId = null) => {
 
     // Ensure excludeUserId is valid before using it
     if (excludeUserId && mongoose.Types.ObjectId.isValid(excludeUserId)) {
-      query.user = { $ne: new mongoose.Types.ObjectId(excludeUserId) }; // Exclude logged-in user
+      query.$and = [
+  { createdBy: { $ne: new mongoose.Types.ObjectId(excludeUserId) } },
+  { assignedTo: { $ne: new mongoose.Types.ObjectId(excludeUserId) } }
+];
+ // Exclude logged-in user
     }
 
     console.log("Final Query being sent to MongoDB:", JSON.stringify(query, null, 2)); // Debugging log
 
-    const tasks = await TaskModel.find(query).populate('user', 'name'); // Populate user name
+    const tasks = await TaskModel.find(query).populate('createdBy', 'name').populate('assignedTo', 'name'); // Populate user name
     console.log("Tasks returned from MongoDB:", tasks); // Log the actual data
 
     return tasks;
