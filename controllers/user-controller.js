@@ -1,5 +1,9 @@
 // Import any required services or models here
 const userService = require("../services/user-services");
+const jwt = require('jsonwebtoken');
+
+// Make sure to access your secret from the environment variable
+const jwtSecret = process.env.JWT_SECRET;
 
 // Define your controller methods
 
@@ -13,39 +17,49 @@ exports.userlist = async (req, res) => {
   }
 };
 
-// Create a new user
+// Create a new user (with role selection)
 exports.createUser = async (req, res) => {
   try {
-    console.log(req.body);
-    const { name, email, password } = req.body;
-    const newUser = await userService.createUser(name, email, password);
-    res.json(newUser);
+    const { name, email, password, role } = req.body; // Add role to the destructuring
+
+    // Call the service method to create the user
+    const newUser = await userService.createUser(name, email, password, role);
+
+    // Sign the JWT token for the user
+    const token = jwt.sign(
+      { userId: newUser._id, email: newUser.email, role: newUser.role }, // Include role in the payload
+      jwtSecret, 
+      { expiresIn: '1h' }
+    );
+
+    // Return the new user and token in the response
+    res.status(201).json({ token, user: newUser });
   } catch (error) {
-    res.status(500).json({ error: "Internal Server Error" });
+    console.error('Error during user creation:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 };
 
-// Login user and return JWT token
+// Login user and return JWT token with role
 exports.loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
     
-    // ✅ Get user and token from userService
     const { user, token } = await userService.loginUser(email, password);
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // ✅ Return user info + token
+    // Return user info including role and token
     res.json({
       user: {
         _id: user._id,
         name: user.name,
         email: user.email,
-        role: user.role, // Ensure role is included
+        role: user.role, // Include role here
       },
-      token, // ✅ Return JWT token
+      token,
     });
 
   } catch (error) {
@@ -53,21 +67,19 @@ exports.loginUser = async (req, res) => {
   }
 };
 
-// Assign role to a user (Admin-only)
+// Admin-only route to assign a role to a user
 exports.assignRole = async (req, res) => {
   try {
-    const { userId, role } = req.body; // ✅ Only take userId from request body
-    const adminId = req.userId; // ✅ Get admin ID from middleware
+    const { userId, role } = req.body; // Get userId and role from request body
+    const adminId = req.userId; // Get the admin ID from the token payload
 
-    console.log("Admin ID from Token:", adminId); // ✅ Debugging log
-    console.log("Attempting to assign role:", role, "to user:", userId); // ✅ Debugging log
-
-    // ✅ Ensure the role is valid
-    if (!["user", "admin"].includes(role)) {
-      return res.status(400).json({ error: "Invalid role. Allowed roles: user, admin." });
+    // Check if the role provided is valid
+    const validRoles = ['Standard', 'ProjectManager', 'TeamLead', 'QA', 'Observer'];
+    if (!validRoles.includes(role)) {
+      return res.status(400).json({ error: "Invalid role. Allowed roles: Standard, ProjectManager, TeamLead, QA, Observer." });
     }
 
-    // ✅ Update user role (middleware already validated admin)
+    // Update the user role using the user service
     const result = await userService.assignUserRole(userId, role);
 
     if (result.matchedCount === 0) {
@@ -79,14 +91,5 @@ exports.assignRole = async (req, res) => {
   } catch (error) {
     console.error("Error in assignRole:", error);
     res.status(500).json({ error: "Failed to assign role", message: error.message });
-  }
-};
-
-exports.userlist = async (req, res) => {
-  try {
-    const users = await userService.listUsers();
-    res.json(users);
-  } catch (error) {
-    res.status(500).json({ error: "Internal Server Error" });
   }
 };

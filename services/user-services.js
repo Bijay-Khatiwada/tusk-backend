@@ -6,7 +6,7 @@ require("dotenv").config(); // Ensure environment variables are loaded
 
 // List all users
 exports.listUsers = async () => {
-  return await UserModel.find({}, "name email role"); // ✅ Fetch only necessary fields
+  return await UserModel.find({}, "name email role"); // Fetch only necessary fields
 };
 
 // User login with JWT token generation
@@ -22,14 +22,14 @@ exports.loginUser = async (email, password) => {
     throw new Error("Invalid credentials");
   }
 
-  // ✅ Generate JWT Token
+  // Generate JWT Token
   const token = jwt.sign(
     { userId: user._id, role: user.role }, // Store userId & role in token
     process.env.JWT_SECRET, // Use a secret key stored in .env
     { expiresIn: "1h" } // Token expires in 1 hour
   );
 
-  return { user, token }; // ✅ Return token along with user data
+  return { user, token }; // Return token along with user data
 };
 
 // Get a user by ID
@@ -37,20 +37,25 @@ exports.getUserById = async (id) => {
   return await UserModel.findById(id);
 };
 
-// Create a new user with a default role of 'user'
-exports.createUser = async (name, email, password) => {
+// Create a new user with a role (default role is 'user' unless specified)
+exports.createUser = async (name, email, password, role = "user") => {
   try {
-    const newUser = new UserModel({ 
+    const existingUser = await UserModel.findOne({ email });
+    if (existingUser) {
+      throw new Error("Email already in use");
+    }
+
+    const newUser = new UserModel({
       name, 
       email, 
       password, 
-      role: "user" // Default role
+      role // Accept role from request body with fallback to "user"
     });
 
     return await newUser.save();
   } catch (error) {
     console.error(error);
-    throw new Error("Error creating user");
+    throw error; // pass it up to the controller
   }
 };
 
@@ -65,13 +70,19 @@ exports.deleteUser = async (id) => {
 };
 
 // Assign a role to a user (Admin-only functionality)
+// Function to assign a new role to a user (Admin functionality)
 exports.assignUserRole = async (userId, role) => {
-  // ✅ Update the role of the target user (middleware already verified admin)
+  // Ensure the role is one of the valid ones
+  const validRoles = ['Standard', 'ProjectManager', 'TeamLead', 'QA', 'Observer'];
+  if (!validRoles.includes(role)) {
+    throw new Error("Invalid role");
+  }
+
+  // Update the user’s role in the database
   const result = await UserModel.updateOne(
     { _id: userId },
-    { $set: { role } }
+    { $set: { role: role } }
   );
 
-  return result;
+  return result; // This will return the result of the update operation
 };
-

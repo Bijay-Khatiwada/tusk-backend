@@ -3,6 +3,8 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 const config = require("./config/config.js");
 const upload = require("./multer.js");
+require('dotenv').config(); // This loads the .env file into process.env
+
 // const paymentRoutes = require("../routes/payment-routes");here
 
 const app = express();

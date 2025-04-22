@@ -14,7 +14,14 @@ exports.listProjects = async () => {
   try {
     return await Project.find({})
       .populate("createdBy", "name")
-      .populate("team", "name");
+      .populate({
+        path: "team",
+        select: "name members",
+        populate: {
+          path: "members",
+          select: "name",
+        },
+      });
   } catch (error) {
     console.error("Error fetching projects:", error);
     throw new Error("Error fetching projects: " + error.message);
@@ -25,7 +32,14 @@ exports.getProjectById = async (projectId) => {
   try {
     return await Project.findById(projectId)
       .populate("createdBy", "name")
-      .populate("team", "name");
+      .populate({
+        path: "team",
+        select: "name members",
+        populate: {
+          path: "members",
+          select: "name",
+        },
+      });
   } catch (error) {
     console.error("Error fetching project:", error);
     throw new Error("Error fetching project: " + error.message);
@@ -34,7 +48,7 @@ exports.getProjectById = async (projectId) => {
 
 exports.updateProject = async (projectId, updateData) => {
   try {
-    console.log("here we are in update project next stsage");
+    console.log("Updating project:", projectId);
     return await Project.findByIdAndUpdate(projectId, updateData, { new: true });
   } catch (error) {
     console.error("Error updating project:", error);

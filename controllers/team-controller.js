@@ -1,9 +1,5 @@
-// team-controller.js
-// team-controller.js
-const Team = require("../models/team.js");
 const teamService = require("../services/team-services.js");
 const User = require('../models/user.js');
-const Project = require('../models/project.js');
 
 exports.createTeam = async (req, res) => {
   try {
@@ -68,4 +64,3 @@ exports.deleteTeam = async (req, res) => {
     res.status(500).json({ message: "Error deleting team", error: error.message });
   }
 };
-

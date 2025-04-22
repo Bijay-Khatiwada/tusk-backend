@@ -1,20 +1,14 @@
 const express = require("express");
 const router = express.Router();
 const teamController = require("../controllers/team-controller");
-// const { isAdmin } = require("../middleware/middleware");
+const { isAuthenticated, isProjectManager, isAdmin } = require("../middleware/middleware");  // Import role-based middleware
 
-router.post('/create', teamController.createTeam);
-router.put('/update/:id', teamController.updateTeam);
-router.delete('/delete/:id', teamController.deleteTeam);
+// Routes for Team management
+router.post('/create', isAuthenticated, isProjectManager, teamController.createTeam);  // Only ProjectManager and Admin can create teams
+router.put('/update/:id', isAuthenticated, isProjectManager, teamController.updateTeam);  // Only ProjectManager and Admin can update teams
+router.delete('/delete/:id', isAuthenticated, isAdmin, teamController.deleteTeam);  // Only Admin can delete teams
 
-router.get('/list', teamController.listTeams);
-router.get('/list/:id', teamController.getTeamById);
-
-// router.get('/list', teamController.listTeams);
-// router.get('/list/:id', teamController.getTeamById);
-
-// admin team routes
-// router.delete("/admin/delete-team/:id", isAdmin, teamController.deleteTeam); //  Delete team
-// router.put("/admin/update-team/:id", isAdmin, upload.single('image'), teamController.updateTeam); // 
+router.get('/list', isAuthenticated, teamController.listTeams);  // Everyone can list teams
+router.get('/list/:id', isAuthenticated, teamController.getTeamById);  // Everyone can get team by ID
 
 module.exports = router;

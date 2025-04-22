@@ -11,6 +11,7 @@ exports.createProject = async (req, res) => {
       return res.status(404).json({ message: "Creator user not found" });
     }
 
+    // Create the project using the service
     const newProject = await projectService.createProject({ name, description, createdBy, team });
     res.status(201).json(newProject);
   } catch (error) {
@@ -41,7 +42,6 @@ exports.getProjectById = async (req, res) => {
 
 exports.updateProject = async (req, res) => {
   try {
-    console.log("here we are in update project");
     const updatedProject = await projectService.updateProject(req.params.projectId, req.body);
     if (!updatedProject) {
       return res.status(404).json({ message: "Project not found" });

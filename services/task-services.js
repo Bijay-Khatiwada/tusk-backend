@@ -169,3 +169,23 @@ exports.deleteTask = async (id) => {
     throw error;
   }
 };
+
+
+
+exports.assignTask = async (taskId, assigneeId) => {
+  try {
+    const task = await TaskModel.findById(taskId);
+    if (!task) {
+      return null;
+    }
+
+    task.assignedTo = assigneeId;
+    await task.save();
+
+    return task;
+  } catch (error) {
+    console.error("Error assigning task:", error);
+    throw new Error("Error assigning task: " + error.message);
+  }
+};
+
