@@ -35,9 +35,14 @@ exports.listallTasks = async (userId = null, excludeUserId = null) => {
 
 
 // Get a task by ID
+// Get a task by ID
 exports.getTaskById = async (id) => {
   try {
-    const task = await TaskModel.findById(id).select('-user').lean(); // Exclude user details and improve performance
+    // Populate createdBy and assignedTo with user details (name)
+    const task = await TaskModel.findById(id)
+      .populate('createdBy', 'name')  // Populating the createdBy field with the user name
+      .populate('assignedTo', 'name') // Populating the assignedTo field with the user name
+      .lean(); // Use lean() for better performance when you don't need Mongoose documents
 
     if (!task) {
       throw new Error("Task not found");
@@ -52,46 +57,24 @@ exports.getTaskById = async (id) => {
 
 
 // Create a new task
-exports.createTask = async (
-  title,
-  description,
-  priority,
-  createdAt,
-  updatedAt,
-  createdBy,
-  assignedTo,
-  status,
-  condition,
-  userId
-) => {
+exports.createTask = async (taskData) => {
   try {
-    const newTask = new Task({
-      title,
-      description,
-      priority,
-      createdAt,
-      updatedAt,
-      createdBy,
-      assignedTo,
-      status, 
-      condition,
-      user: userId, // user who created the task
-    });
-
-    // Save the task to the database
+    const newTask = new Task(taskData);
     return await newTask.save();
   } catch (error) {
     console.error("Error saving task:", error);
     throw new Error('Error creating task: ' + error.message);
   }
-}; 
+};
+
 const Task = require('../models/task'); // assuming task model is in models/task.js
 
 exports.updateTask = async (taskId, updateData) => {
   try {
+    // Find the task by ID and update it with the new data
     const updatedTask = await Task.findByIdAndUpdate(taskId, updateData, {
-      new: true, // Return updated document
-      runValidators: true, // Ensure updated data follows schema rules
+      new: true, // Return the updated task
+      runValidators: true, // Ensure that the updated data adheres to the schema rules
     });
 
     return updatedTask;

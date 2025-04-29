@@ -1,23 +1,36 @@
 const projectService = require("../services/project-services.js");
 const User = require('../models/user.js');
 
+const Project = require('../models/project.js'); // Assuming you have a Project model
+const Team = require('../models/team.js'); // <--- YOU FORGOT THIS DUDE
+
 exports.createProject = async (req, res) => {
   try {
-    const { name, description, createdBy, team } = req.body;
+    const { name, description, team, createdBy } = req.body;
 
-    // Optional: Validate creator exists
-    const creator = await User.findById(createdBy);
-    if (!creator) {
-      return res.status(404).json({ message: "Creator user not found" });
+    // Validate if team exists
+    const existingTeam = await Team.findById(team);
+    if (!existingTeam) {
+      return res.status(400).json({ message: 'Team not found' });
     }
 
-    // Create the project using the service
-    const newProject = await projectService.createProject({ name, description, createdBy, team });
-    res.status(201).json(newProject);
+    const project = new Project({
+      name,
+      description,
+      team,
+      createdBy,
+    });
+
+    await project.save();
+
+    res.status(201).json({ message: 'Project created successfully', project });
   } catch (error) {
-    res.status(500).json({ message: "Error creating project", error: error.message });
+    console.error('Error creating project:', error);
+    res.status(500).json({ message: 'Failed to create project', error: error.message });
   }
 };
+
+
 
 exports.getAllProjects = async (req, res) => {
   try {
@@ -30,7 +43,7 @@ exports.getAllProjects = async (req, res) => {
 
 exports.getProjectById = async (req, res) => {
   try {
-    const project = await projectService.getProjectById(req.params.projectId);
+    const project = await projectService.getProjectById(req.params.id);
     if (!project) {
       return res.status(404).json({ message: "Project not found" });
     }
@@ -42,15 +55,21 @@ exports.getProjectById = async (req, res) => {
 
 exports.updateProject = async (req, res) => {
   try {
-    const updatedProject = await projectService.updateProject(req.params.projectId, req.body);
+    const { name, description, team } = req.body;
+
+    const updateData = { name, description, team };
+
+    const updatedProject = await projectService.updateProject(req.params.id, updateData);
     if (!updatedProject) {
       return res.status(404).json({ message: "Project not found" });
     }
     res.status(200).json(updatedProject);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: "Error updating project", error: error.message });
   }
 };
+
 
 exports.deleteProject = async (req, res) => {
   try {

@@ -4,7 +4,7 @@ const mongoose = require("mongoose");
 const config = require("./config/config.js");
 const upload = require("./multer.js");
 require('dotenv').config(); // This loads the .env file into process.env
-
+const refreshTokenRoute = require('./routes/token-routes');
 // const paymentRoutes = require("../routes/payment-routes");here
 
 const app = express();
@@ -34,6 +34,8 @@ app.use("/comment", require("./routes/comment-routes.js"));
 // app.use("/notification", require("./routes/notification-routes.js"));
 // app.use("/project", require("./routes/project-routes.js"));
 // app.use("/activity", require("./routes/activity-routes.js"));
+
+app.use('/api', refreshTokenRoute);
 
 // app.use("/payment", paymentRoutes);
 // app.use("/test", require("./routes/test-routes.js"))

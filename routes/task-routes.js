@@ -4,9 +4,9 @@ const taskController = require("../controllers/task-controller");
 const { isAuthenticated, isAdmin, isProjectManager, isTeamLead, isQA, isObserver } = require("../middleware/middleware");
 
 // Routes for task management
-router.post('/create', isAuthenticated, isProjectManager, taskController.createTask); // ProjectManager and Admins only
+router.post('/create', isAuthenticated, taskController.createTask); // ProjectManager and Admins only
 router.put('/update/:id', isAuthenticated, isTeamLead, taskController.updateTask); // TeamLead and Admins only
-router.delete('/delete/:id', isAuthenticated, isAdmin, taskController.deleteTask); // Admins only
+router.delete('/delete/:id', isAuthenticated, taskController.deleteTask); // Admins only
 router.post("/assign-task", isAuthenticated, isTeamLead, taskController.assignTask);
 
 // Routes for viewing tasks (QA and Observers can view tasks)

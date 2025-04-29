@@ -3,6 +3,7 @@
 const User = require("../models/user");
 const taskService = require("../services/task-services");
 const mongoose = require("mongoose");
+const Task = require("../models/task");
 
 exports.listTasks = async (req, res) => {
   try {
@@ -28,18 +29,13 @@ exports.getTaskById = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
-
-// Create a new task (only ProjectManagers and Admins can create tasks)
 exports.createTask = async (req, res) => {
   try {
-    // Check if the user has the correct role to create tasks
-    if (req.userRole !== "ProjectManager" && req.userRole !== "Admin") {
-      return res.status(403).json({ error: "Access Denied. Only Project Managers and Admins can create tasks." });
-    }
+    // 🚫 No role check anymore — any authenticated user can create a task
 
     const { title, description, priority, assignedTo, status } = req.body;
 
-    // Check if the assigned user exists
+    // Check if assigned user exists (if assignedTo is provided)
     if (assignedTo) {
       const assignedUser = await User.findById(assignedTo);
       if (!assignedUser) {
@@ -47,26 +43,41 @@ exports.createTask = async (req, res) => {
       }
     }
 
-    // Use the taskService to create a new task
-    const newTask = await taskService.createTask(title, description, priority, assignedTo, status, req.userId);
+    const now = new Date();
 
-    // Respond with the newly created task
+    // Prepare the task object
+    const taskData = {
+      title,
+      description,
+      priority,
+      assignedTo,
+      status,
+      createdAt: now,
+      updatedAt: now,
+      condition: 'New',        // Default condition
+      createdBy: req.userId,   // Creator's ID
+      user: req.userId,        // (If you need to reference user)
+    };
+
+    // Create and save the task
+    const newTask = new Task(taskData);
+    await newTask.save();
+
+    // Respond with the created task
     res.status(201).json(newTask);
+
   } catch (error) {
     console.error("Error creating task:", error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
 
+
 // Update a task (only TeamLeads and Admins can update tasks)
 exports.updateTask = async (req, res) => {
   try {
-    // Only TeamLeads and Admins can update tasks
-    if (req.userRole !== "TeamLead" && req.userRole !== "Admin") {
-      return res.status(403).json({ error: "Access Denied. Only Team Leads and Admins can update tasks." });
-    }
-
-    const { id } = req.params; 
+    console.log('Request Body:', req.body);  // Log the data being sent from the frontend
+    const { id } = req.params;
     const updateData = req.body;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -78,13 +89,18 @@ exports.updateTask = async (req, res) => {
       return res.status(404).json({ message: "Task not found" });
     }
 
+    console.log('Existing Task:', existingTask);  // Log the existing task before update
+
     const updatedTask = await taskService.updateTask(id, updateData);
+    console.log('Updated Task:', updatedTask);  // Log the updated task
     res.status(200).json(updatedTask);
   } catch (error) {
     console.error("Error updating task:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
+
 
 // Delete a task (only Admins can delete tasks)
 exports.deleteTask = async (req, res) => {
